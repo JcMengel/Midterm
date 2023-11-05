@@ -1,0 +1,41 @@
+---
+- name: Basic Configuration and Routing
+  hosts: CSR1kv
+  gather_facts: false
+  connection: local
+
+  tasks:
+    - name: Configure MOTD Banner
+      ios_banner:
+        banner: motd
+        text: "No Unauthorized Users"
+      register: motd_changed
+      
+    - name: Create IPv4 Loopback Interface
+      ios_config:
+        lines:
+          - description IPv4 Loopback Interface
+          - ip address 192.168.1.1 255.255.255.0
+        parents: interface Loopback0
+
+    - name: Configure OSPF router ID
+      ios_config:
+        lines:
+          - router-id 1.1.1.1
+        parents: router ospf 1
+
+    - name: Configure OSPF on Loopback0
+      ios_config:
+        lines:
+          - ospf 1 ipv4 area 0
+        parents: interface Loopback0
+
+    - name: Adjust spanning tree cost on lo0
+      ios_config:
+        lines:
+          - spanning-tree cost 1
+        parents: interface loopback0
+        
+
+
+
